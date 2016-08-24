@@ -19,7 +19,7 @@ const server = http.createServer((req, res) => {
       const body = JSON.parse(data)
 
       body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
-      body.inputs.template.pathToEngine = path.join(__dirname, 'scripts', path.basename(body.inputs.template.pathToEngine))
+      body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
 
       console.log(JSON.stringify(body))
 
