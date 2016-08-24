@@ -3,6 +3,12 @@ const manager = require('script-manager')()
 const path = require('path')
 
 const server = http.createServer((req, res) => {
+  if (req.method === 'GET') {
+    res.statusCode = 200
+    res.setHeader('Content-Type', 'text/plain')
+    return res.end('OK')
+  }
+
   var data = ''
   req.on('data', function (chunk) {
     data += chunk.toString()
@@ -19,7 +25,7 @@ const server = http.createServer((req, res) => {
       const body = JSON.parse(data)
 
       body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
-      body.inputs.template.pathToEngine = path.join(__dirname, 'scripts', path.basename(body.inputs.template.pathToEngine))
+      body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
 
       console.log(JSON.stringify(body))
 
