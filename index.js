@@ -1,5 +1,6 @@
 const http = require('http')
 const manager = require('script-manager')()
+const path = require('path')
 
 const server = http.createServer((req, res) => {
   var data = ''
@@ -16,6 +17,11 @@ const server = http.createServer((req, res) => {
       }
 
       const body = JSON.parse(data)
+
+      body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
+      body.inputs.template.pathToEngine = path.join(__dirname, 'scripts', path.basename(body.inputs.template.pathToEngine))
+
+      console.log(JSON.stringify(body))
 
       manager.execute(body.inputs, body.options, (err, scriptResponse) => {
         if (err) {

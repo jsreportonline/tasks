@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/jsreportonline/tasks#readme",
   "dependencies": {
+    "hasha": "2.2.0",
+    "lru-cache": "4.0.1",
     "script-manager": "0.5.6"
   },
   "devDependencies": {
