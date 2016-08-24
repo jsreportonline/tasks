@@ -1,0 +1,25 @@
+{
+  "name": "tasks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsreportonline/tasks.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jsreportonline/tasks/issues"
+  },
+  "homepage": "https://github.com/jsreportonline/tasks#readme",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "eslint": "3.3.1",
+    "standard": "7.1.2"
+  }
+}
