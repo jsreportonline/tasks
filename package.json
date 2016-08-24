@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jsreportonline/tasks#readme",
   "dependencies": {
+    "script-manager": "0.5.6"
   },
   "devDependencies": {
     "eslint": "3.3.1",
