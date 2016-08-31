@@ -26,7 +26,10 @@ const server = http.createServer((req, res) => {
       const body = JSON.parse(data)
 
       body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
-      //body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
+
+      if (body.inputs.engine) {
+        body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
+      }
 
       manager.execute(body.inputs, body.options, (err, scriptResponse) => {
         if (err) {
