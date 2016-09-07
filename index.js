@@ -2,47 +2,61 @@ const http = require('http')
 const manager = require('script-manager')()
 const path = require('path')
 
-const server = http.createServer((req, res) => {
-  if (req.method === 'GET') {
-    res.statusCode = 200
-    res.setHeader('Content-Type', 'text/plain')
-    return res.end('OK')
+manager.ensureStarted((err) => {
+  if (err) {
+    console.error(err)
+    throw err
   }
 
-  var data = ''
-  req.on('data', function (chunk) {
-    data += chunk.toString()
-  })
+  const server = http.createServer((req, res) => {
+    if (req.method === 'GET') {
+      res.statusCode = 200
+      res.setHeader('Content-Type', 'text/plain')
+      return res.end('OK')
+    }
 
-  req.on('end', function () {
-    manager.ensureStarted((err) => {
-      if (err) {
-        res.statusCode = 500
-        res.setHeader('Content-Type', 'text/plain')
-        return res.end('Error when starting script manager ' + err.stack)
+    var data = ''
+    req.on('data', function (chunk) {
+      if (chunk) {
+        data += chunk.toString()
       }
+    })
 
-      const body = JSON.parse(data)
+    req.on('end', function () {
+      try {
+        console.log('running request')
 
-      body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
+        const body = JSON.parse(data)
 
-      if (body.inputs.engine) {
-        body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
-      }
+        body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
 
-      manager.execute(body.inputs, body.options, (err, scriptResponse) => {
-        if (err) {
-          res.statusCode = 500
-          res.setHeader('Content-Type', 'text/plain')
-          return res.end('Error when executing script ' + err.stack)
+        if (body.inputs.engine) {
+          body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
         }
 
-        res.statusCode = 200
-        res.setHeader('Content-Type', 'application/json')
-        return res.end(JSON.stringify(scriptResponse))
-      })
+        manager.execute(body.inputs, body.options, (err, scriptResponse) => {
+          console.log('request finished ' + err)
+          if (err) {
+            res.statusCode = 500
+            res.setHeader('Content-Type', 'text/plain')
+            return res.end('Error when executing script ' + err.stack)
+          }
+
+          res.statusCode = 200
+          res.setHeader('Content-Type', 'application/json')
+          return res.end(JSON.stringify(scriptResponse))
+        })
+      } catch (e) {
+        res.statusCode = 500
+        res.setHeader('Content-Type', 'text/plain')
+        return res.end('Error when executing script ' + e.stack)
+      }
     })
   })
+
+  server.listen(3000)
 })
 
-server.listen(3000)
+
+
+
