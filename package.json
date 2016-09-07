@@ -19,6 +19,7 @@
   "dependencies": {
     "handlebars": "4.0.5",
     "hasha": "2.2.0",
+    "jsrender": "0.9.80",
     "lodash": "4.15.0",
     "lru-cache": "4.0.1",
     "script-manager": "0.5.6",
