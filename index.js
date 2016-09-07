@@ -22,7 +22,6 @@ const server = http.createServer((req, res) => {
         return res.end('Error when starting script manager ' + err.stack)
       }
 
-      console.log(data)
       const body = JSON.parse(data)
 
       body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
