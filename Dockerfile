@@ -16,4 +16,5 @@ RUN npm install --production
 COPY . /usr/src/app
 
 EXPOSE 3000
+HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1
 CMD [ "node", "index.js" ]
