@@ -8,8 +8,11 @@ manager.ensureStarted((err) => {
     throw err
   }
 
+  console.log('starting server')
+
   const server = http.createServer((req, res) => {
     if (req.method === 'GET') {
+      console.log('ping')
       res.statusCode = 200
       res.setHeader('Content-Type', 'text/plain')
       return res.end('OK')
@@ -24,7 +27,7 @@ manager.ensureStarted((err) => {
 
     req.on('end', function () {
       try {
-        console.log('running request')
+        console.log('running request ' + new Date().getTime())
 
         const body = JSON.parse(data)
 
