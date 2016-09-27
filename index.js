@@ -2,6 +2,7 @@ const http = require('http')
 const manager = require('script-manager')()
 const path = require('path')
 
+var start = new Date().getTime()
 manager.ensureStarted((err) => {
   if (err) {
     console.error(err)
@@ -11,6 +12,8 @@ manager.ensureStarted((err) => {
   console.log('starting server')
 
   const server = http.createServer((req, res) => {
+    console.log('received request ' + req.method + ' +' + (new Date().getTime() - start))
+
     if (req.method === 'GET') {
       console.log('ping')
       res.statusCode = 200
@@ -27,7 +30,7 @@ manager.ensureStarted((err) => {
 
     req.on('end', function () {
       try {
-        console.log('running request ' + new Date().getTime())
+        console.log('running request ' + ' +' + (new Date().getTime() - start) + data.substring(0, 20))
 
         const body = JSON.parse(data)
 
@@ -38,7 +41,7 @@ manager.ensureStarted((err) => {
         }
 
         manager.execute(body.inputs, body.options, (err, scriptResponse) => {
-          console.log('request finished ' + err)
+          console.log('request finished ' + ' +' + (new Date().getTime() - start))
           if (err) {
             res.statusCode = 500
             res.setHeader('Content-Type', 'text/plain')
@@ -50,6 +53,7 @@ manager.ensureStarted((err) => {
           return res.end(JSON.stringify(scriptResponse))
         })
       } catch (e) {
+        console.log('should not really get here')
         res.statusCode = 500
         res.setHeader('Content-Type', 'text/plain')
         return res.end('Error when executing script ' + e.stack)
