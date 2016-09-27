@@ -2,6 +2,8 @@ FROM mhart/alpine-node
 MAINTAINER Jan Blaha
 EXPOSE 3000
 
+RUN apk add --update curl
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
