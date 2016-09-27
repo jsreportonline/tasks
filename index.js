@@ -2,6 +2,10 @@ const http = require('http')
 const manager = require('script-manager')()
 const path = require('path')
 
+process.on('unhandledRejection', (reason, p) => {
+  console.error('wtf ' + reason)
+})
+
 var start = new Date().getTime()
 manager.ensureStarted((err) => {
   if (err) {
