@@ -45,7 +45,7 @@ manager.ensureStarted((err) => {
           if (err) {
             res.statusCode = 500
             res.setHeader('Content-Type', 'text/plain')
-            return res.end('Error when executing script ' + err.stack)
+            return res.end('Error when executing script ' + err.message)
           }
 
           res.statusCode = 200
