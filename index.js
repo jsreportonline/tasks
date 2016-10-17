@@ -41,19 +41,22 @@ manager.ensureStarted((err) => {
         }
 
         manager.execute(body.inputs, body.options, (err, scriptResponse) => {
-          console.log('request finished ' + ' +' + (new Date().getTime() - start))
+          res.setHeader('Content-Type', 'application/json')
+
           if (err) {
-            res.statusCode = 500
-            res.setHeader('Content-Type', 'text/plain')
-            return res.end('Error when executing script ' + err.message)
+            res.statusCode = 400
+            return res.end(JSON.stringify({
+              error: {
+                message: err.message,
+                stack: err.stack
+              }
+            }))
           }
 
           res.statusCode = 200
-          res.setHeader('Content-Type', 'application/json')
           return res.end(JSON.stringify(scriptResponse))
         })
       } catch (e) {
-        console.log('should not really get here')
         res.statusCode = 500
         res.setHeader('Content-Type', 'text/plain')
         return res.end('Error when executing script ' + e.stack)
