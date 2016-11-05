@@ -90,7 +90,7 @@ manager.ensureStarted((err) => {
           body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
 
           if (body.inputs.template.recipe === 'xlsx') {
-            body.inputs.$xlsxModuleDirname = __dirname
+            body.inputs.data.$xlsxModuleDirname = __dirname
           }
         }
 
