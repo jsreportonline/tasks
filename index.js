@@ -1,8 +1,58 @@
 const http = require('http')
-const manager = require('script-manager')()
+const manager = require('script-manager')({
+  timeout: 180000
+})
 const path = require('path')
+const async = require('async')
+const fs = require('fs')
 
 var start = new Date().getTime()
+
+const addXlsxFiles = (scriptResponse, cb) => {
+  let content
+  try {
+    content = JSON.parse(scriptResponse.content)
+  } catch (e) {
+    // fallback to original syntax
+    cb()
+  }
+  async.parallel(content.$files.map((f, i) => (cb) => {
+    fs.readFile(f, (err, fcontent) => {
+      if (err) {
+        return cb(err)
+      }
+
+      content.$files[i] = fcontent.toString('base64')
+      cb()
+    })
+  }), (err) => {
+    if (err) {
+      return cb(err)
+    }
+
+    scriptResponse.content = JSON.stringify(content)
+    cb()
+  })
+}
+
+const postProcess = (body, scriptResponse, cb) => {
+  if (body.inputs.engine && body.inputs.template.recipe === 'xlsx') {
+    return addXlsxFiles(scriptResponse, cb)
+  }
+
+  cb()
+}
+
+const error = (err, res) => {
+  res.statusCode = 400
+  res.end(JSON.stringify({
+    error: {
+      message: err.message,
+      stack: err.stack
+    }
+  }))
+}
+
 manager.ensureStarted((err) => {
   if (err) {
     console.error(err)
@@ -38,23 +88,27 @@ manager.ensureStarted((err) => {
 
         if (body.inputs.engine) {
           body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
+
+          if (body.inputs.template.recipe === 'xlsx') {
+            body.inputs.$xlsxModuleDirname = __dirname
+          }
         }
 
         manager.execute(body.inputs, body.options, (err, scriptResponse) => {
           res.setHeader('Content-Type', 'application/json')
 
           if (err) {
-            res.statusCode = 400
-            return res.end(JSON.stringify({
-              error: {
-                message: err.message,
-                stack: err.stack
-              }
-            }))
+            return error(err, res)
           }
 
-          res.statusCode = 200
-          return res.end(JSON.stringify(scriptResponse))
+          postProcess(body, scriptResponse, (err) => {
+            if (err) {
+              return error(err, res)
+            }
+
+            res.statusCode = 200
+            return res.end(JSON.stringify(scriptResponse))
+          })
         })
       } catch (e) {
         res.statusCode = 500
@@ -64,7 +118,7 @@ manager.ensureStarted((err) => {
     })
   })
 
-  server.listen(3000)
+  server.listen(process.env.PORT || 3000)
 })
 
 
