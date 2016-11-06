@@ -62,10 +62,7 @@ manager.ensureStarted((err) => {
   console.log('starting server')
 
   const server = http.createServer((req, res) => {
-    console.log('received request ' + req.method + ' +' + (new Date().getTime() - start))
-
     if (req.method === 'GET') {
-      console.log('ping')
       res.statusCode = 200
       res.setHeader('Content-Type', 'text/plain')
       return res.end('OK')
@@ -90,6 +87,7 @@ manager.ensureStarted((err) => {
           body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
 
           if (body.inputs.template.recipe === 'xlsx') {
+            body.inputs.tasks.allowedModules.push(path.join(__dirname, 'lib', 'fsproxy.js'))
             body.inputs.data.$xlsxModuleDirname = __dirname
           }
         }
