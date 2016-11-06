@@ -5,6 +5,7 @@ const manager = require('script-manager')({
 const path = require('path')
 const async = require('async')
 const fs = require('fs')
+const os = require('os')
 
 const addXlsxFiles = (scriptResponse, cb) => {
   let content
@@ -87,7 +88,7 @@ manager.ensureStarted((err) => {
           if (body.inputs.template.recipe === 'xlsx') {
             body.inputs.tasks.allowedModules.push(path.join(__dirname, 'lib', 'fsproxy.js'))
             body.inputs.data.$xlsxModuleDirname = __dirname
-            body.inputs.data.$tempDirectory = process.env.temp
+            body.inputs.data.$tempDirectory = os.tmpdir()
           }
         }
 
