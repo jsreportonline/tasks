@@ -6,8 +6,6 @@ const path = require('path')
 const async = require('async')
 const fs = require('fs')
 
-var start = new Date().getTime()
-
 const addXlsxFiles = (scriptResponse, cb) => {
   let content
   try {
@@ -77,7 +75,7 @@ manager.ensureStarted((err) => {
 
     req.on('end', function () {
       try {
-        console.log('running request ' + ' +' + (new Date().getTime() - start) + data.substring(0, 20))
+        console.log('running request')
 
         const body = JSON.parse(data)
 
@@ -89,6 +87,7 @@ manager.ensureStarted((err) => {
           if (body.inputs.template.recipe === 'xlsx') {
             body.inputs.tasks.allowedModules.push(path.join(__dirname, 'lib', 'fsproxy.js'))
             body.inputs.data.$xlsxModuleDirname = __dirname
+            body.inputs.data.$tempDirectory = process.env.temp
           }
         }
 
@@ -101,9 +100,11 @@ manager.ensureStarted((err) => {
 
           postProcess(body, scriptResponse, (err) => {
             if (err) {
+              console.error(err)
               return error(err, res)
             }
 
+            console.log('done')
             res.statusCode = 200
             return res.end(JSON.stringify(scriptResponse))
           })
