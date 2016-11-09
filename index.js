@@ -13,7 +13,7 @@ const addXlsxFiles = (scriptResponse, cb) => {
     content = JSON.parse(scriptResponse.content)
   } catch (e) {
     // fallback to original syntax
-    cb()
+    return cb()
   }
   async.parallel(content.$files.map((f, i) => (cb) => {
     fs.readFile(f, (err, fcontent) => {
