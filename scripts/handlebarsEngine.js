@@ -4,6 +4,8 @@
 
 var pattern = /%}%/g;
 var Handlebars = require('handlebars')
+var HandlebarsIntl = require('handlebars-intl')
+HandlebarsIntl.registerWith(Handlebars)
 
 var regexDoubleBrackets = /({#[^{}]{0,20} {{{[^{}]{0,20})(}}}})/g
 var regexTrippleBrackets = /({#[^{}]{0,20} {{[^{}]{0,20})(}}})/g
