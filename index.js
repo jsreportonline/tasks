@@ -1,6 +1,6 @@
 const http = require('http')
 const manager = require('script-manager')({
-  timeout: 180000
+  timeout: 10000
 })
 const path = require('path')
 const async = require('async')
