@@ -119,4 +119,3 @@ module.exports = function (inputs, callback, done) {
 
   vm.runInNewContext(inputs.script + (inputs.method === 'beforeRender' ? runBeforeRender : runAfterRender), sandbox)
 }
-

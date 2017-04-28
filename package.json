@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "standard",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -16,6 +17,11 @@
     "url": "https://github.com/jsreportonline/tasks/issues"
   },
   "homepage": "https://github.com/jsreportonline/tasks#readme",
+  "standard": {
+    "ignore": [
+      "lib/fsproxy.js"
+    ]
+  },
   "dependencies": {
     "ejs": "2.5.2",
     "handlebars": "4.0.5",
@@ -34,7 +40,7 @@
     "xml2js": "0.4.17"
   },
   "devDependencies": {
-    "eslint": "3.3.1",
-    "standard": "7.1.2"
+    "eslint": "3.19.0",
+    "standard": "9.0.2"
   }
 }
