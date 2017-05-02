@@ -6,7 +6,7 @@ const path = require('path')
 const async = require('async')
 const fs = require('fs')
 const os = require('os')
-// i like docker :D
+
 const addXlsxFiles = (scriptResponse, cb) => {
   let content
   try {
