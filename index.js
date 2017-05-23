@@ -81,72 +81,16 @@ manager.ensureStarted((err) => {
 
         const body = JSON.parse(data)
 
-        body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
+        body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))          
 
         if (body.inputs.engine) {
           body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
+                    
+          body.inputs.tasks.modules.find((m) => m.alias === 'lodash').path = require.resolve('lodash')
+          body.inputs.tasks.modules.find((m) => m.alias === 'xml2js').path = require.resolve('xml2js')  
 
           if (body.inputs.template.recipe === 'xlsx') {
-            if (body.inputs.tasks.allowedModules.indexOf('fsproxy.js') === -1) {
-              body.inputs.tasks.allowedModules.push('fsproxy.js')
-            }
-
-            if (body.inputs.tasks.allowedModules.indexOf('lodash') === -1) {
-              body.inputs.tasks.allowedModules.push('lodash')
-            }
-
-            if (body.inputs.tasks.allowedModules.indexOf('xml2js') === -1) {
-              body.inputs.tasks.allowedModules.push('xml2js')
-            }
-
-            let fsproxyPath = path.join(__dirname, 'lib', 'fsproxy.js')
-
-            if (Array.isArray(body.inputs.tasks.modules)) {
-              let depIndex = _.findIndex(body.inputs.tasks.modules, { alias: 'fsproxy.js' })
-
-              if (depIndex !== -1) {
-                body.inputs.tasks.modules[0].path = fsproxyPath
-              } else {
-                body.inputs.tasks.modules.push({
-                  alias: 'fsproxy.js',
-                  path: fsproxyPath
-                })
-              }
-
-              depIndex = _.findIndex(body.inputs.tasks.modules, { alias: 'lodash' })
-
-              if (depIndex !== -1) {
-                body.inputs.tasks.modules[0].path = require.resolve('lodash')
-              } else {
-                body.inputs.tasks.modules.push({
-                  alias: 'lodash',
-                  path: require.resolve('lodash')
-                })
-              }
-
-              depIndex = _.findIndex(body.inputs.tasks.modules, { alias: 'xml2js' })
-
-              if (depIndex !== -1) {
-                body.inputs.tasks.modules[0].path = require.resolve('xml2js')
-              } else {
-                body.inputs.tasks.modules.push({
-                  alias: 'xml2js',
-                  path: require.resolve('xml2js')
-                })
-              }
-            } else {
-              body.inputs.tasks.modules = [{
-                alias: 'fsproxy.js',
-                path: fsproxyPath
-              }, {
-                alias: 'lodash',
-                path: require.resolve('lodash')
-              }, {
-                alias: 'xml2js',
-                path: require.resolve('xml2js')
-              }]
-            }
-
+            body.inputs.tasks.modules.find((m) => m.alias === 'fsproxy.js').path = path.join(__dirname, 'lib', 'fsproxy.js')            
             body.inputs.data.$xlsxModuleDirname = __dirname
             body.inputs.data.$tempDirectory = os.tmpdir()
           }
