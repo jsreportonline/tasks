@@ -10,13 +10,16 @@ var vm = require('vm')
 var path = require('path')
 var os = require('os')
 var resolveReferences = require('./resolveReferences.js')
-var hasha = require('hasha')
 var LRU = require('lru-cache')
+var extend = require('node.extend')
 var compiledCache
+
 module.exports = function (inputs, callback, done) {
   inputs.tasks = inputs.tasks || {}
+  inputs.template = extend({}, inputs.template)
+
   if (!compiledCache) {
-    compiledCache = LRU(inputs.tasks.templateCache || {max: 100})
+    compiledCache = LRU(inputs.tasks.templateCache || { max: 100 })
   }
 
   if (inputs.tasks.templateCache && inputs.tasks.templateCache.enabled === false) {
@@ -52,7 +55,7 @@ module.exports = function (inputs, callback, done) {
       }
     }
 
-    var result = safeRequire(require.main.require, moduleName, searchedPaths) ||
+    var result = (require.main ? safeRequire(require.main.require, moduleName, searchedPaths) : false) ||
       safeRequire(require, moduleName, searchedPaths) ||
       safeRequire(require, path.join(inputs.rootDirectory, moduleName), searchedPaths) ||
       safeRequire(require, path.join(inputs.appDirectory, moduleName), searchedPaths) ||
@@ -66,15 +69,23 @@ module.exports = function (inputs, callback, done) {
   }
 
   var _require = function (moduleName) {
+    var modules = inputs.tasks.modules.filter(function (m) {
+      return m.alias === moduleName
+    })
+
+    if (modules.length > 0) {
+      return require(modules[0].path)
+    }
+
     if (inputs.tasks.allowedModules === '*') {
       return doRequire(moduleName)
     }
 
-    var modules = (inputs.tasks.allowedModules || []).filter(function (mod) {
+    var allowedModules = (inputs.tasks.allowedModules || []).filter(function (mod) {
       return mod === moduleName
     })
 
-    if (modules.length === 1) {
+    if (allowedModules.length === 1) {
       return doRequire(moduleName)
     }
 
@@ -82,7 +93,11 @@ module.exports = function (inputs, callback, done) {
       '{"tasks": { "allowedModules": ["' + moduleName + '"] } } ... Alternatively you can also set "*" to allowedModules to enable everything')
   }
 
-  inputs.data = resolveReferences(inputs.data)
+  inputs.data = resolveReferences(inputs.data) || {}
+  inputs.data.__dataDirectory = inputs.dataDirectory
+  inputs.data.__appDirectory = inputs.appDirectory
+  inputs.data.__rootDirectory = inputs.rootDirectory
+  inputs.data.__parentModuleDirectory = inputs.parentModuleDirectory
 
   var engine = require(inputs.engine)
 
@@ -110,8 +125,6 @@ module.exports = function (inputs, callback, done) {
   engine = function (template) {
     var key = template + ':' + inputs.engine
 
-    key = hasha(key, {algorithm: 'md5'})
-
     if (!compiledCache.get(key)) {
       isFromCache = false
       console.log('Compiled template not found in the cache, compiling')
@@ -128,6 +141,7 @@ module.exports = function (inputs, callback, done) {
     console: console,
     require: _require,
     render: engine,
+    __dataDirectory: inputs.dataDirectory,
     __appDirectory: inputs.appDirectory,
     __rootDirectory: inputs.rootDirectory,
     __parentModuleDirectory: inputs.parentModuleDirectory,
@@ -147,7 +161,7 @@ module.exports = function (inputs, callback, done) {
   if (inputs.template.helpers) {
     // with in-process strategy helpers can be already a filled helpers object
     if (typeof inputs.template.helpers === 'string' || inputs.template.helpers instanceof String) {
-      vm.runInNewContext(inputs.template.helpers, sandbox)
+      vm.runInNewContext(inputs.template.helpers, sandbox, { timeout: inputs.tasks.timeout })
 
       inputs.template.helpers = {}
       for (var fn in sandbox) {
@@ -165,7 +179,7 @@ module.exports = function (inputs, callback, done) {
   }
 
   try {
-    vm.runInNewContext('respond(null, render(m.template.content)(m.template.helpers, m.data))', sandbox)
+    vm.runInNewContext('respond(null, render(m.template.content)(m.template.helpers, m.data))', sandbox, { timeout: inputs.tasks.timeout })
   } catch (e) {
     var ex = e
     if (!e.message) {
