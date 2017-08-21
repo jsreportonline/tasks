@@ -15,7 +15,7 @@ module.exports = function (inputs, callback, done) {
       }
     }
 
-    var result = safeRequire(require.main.require, moduleName, searchedPaths) ||
+    var result = (require.main ? safeRequire(require.main.require, moduleName, searchedPaths) : false) ||
       safeRequire(require, moduleName, searchedPaths) ||
       safeRequire(require, path.join(inputs.rootDirectory, moduleName), searchedPaths) ||
       safeRequire(require, path.join(inputs.appDirectory, moduleName), searchedPaths) ||
@@ -52,6 +52,10 @@ module.exports = function (inputs, callback, done) {
     })
   }
 
+  if (inputs.response.content) {
+    inputs.response.content = new Buffer(inputs.response.content, 'binary')
+  }
+
   var messages = []
   var console = {}
 
@@ -79,7 +83,6 @@ module.exports = function (inputs, callback, done) {
     done(null, {
       request: inputs.request,
       response: inputs.response,
-      shouldRunAfterRender: true,
       logs: messages,
       error: err ? {
         message: err.message,
@@ -114,8 +117,8 @@ module.exports = function (inputs, callback, done) {
 
   backCompatibleRequest.reporter = sandbox.reporter
 
-  var runBeforeRender = "\nif (typeof beforeRender === 'function') { beforeRender(__request, __response, done); } else { if (typeof afterRender === 'function') done() }"
+  var runBeforeRender = "\n__request.shouldRunAfterRender = typeof afterRender === 'function'; if (typeof beforeRender === 'function') { beforeRender(__request, __response, done); } else {  if (typeof afterRender === 'function') done()  }"
   var runAfterRender = "\nif (typeof afterRender === 'function') { afterRender(__request, __response, done); } else { done(); }"
 
-  vm.runInNewContext(inputs.script + (inputs.method === 'beforeRender' ? runBeforeRender : runAfterRender), sandbox)
+  vm.runInNewContext(inputs.script + (inputs.method === 'beforeRender' ? runBeforeRender : runAfterRender), sandbox, { timeout: inputs.timeout })
 }
