@@ -68,29 +68,26 @@ manager.ensureStarted((err) => {
       return res.end('OK')
     }
 
-    var data = ''
+    let data = []
     req.on('data', function (chunk) {
-      if (chunk) {
-        data += chunk.toString()
-      }
+      data.push(chunk)
     })
 
     req.on('end', function () {
       try {
         console.log('running request')
+        const body = JSON.parse(Buffer.concat(data).toString())
 
-        const body = JSON.parse(data)
-
-        body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))          
+        body.options.execModulePath = path.join(__dirname, 'scripts', path.basename(body.options.execModulePath))
 
         if (body.inputs.engine) {
           body.inputs.engine = path.join(__dirname, 'scripts', path.basename(body.inputs.engine))
-                    
+
           body.inputs.tasks.modules.find((m) => m.alias === 'lodash').path = require.resolve('lodash')
-          body.inputs.tasks.modules.find((m) => m.alias === 'xml2js').path = require.resolve('xml2js')  
+          body.inputs.tasks.modules.find((m) => m.alias === 'xml2js').path = require.resolve('xml2js')
 
           if (body.inputs.template.recipe === 'xlsx') {
-            body.inputs.tasks.modules.find((m) => m.alias === 'fsproxy.js').path = path.join(__dirname, 'lib', 'fsproxy.js')            
+            body.inputs.tasks.modules.find((m) => m.alias === 'fsproxy.js').path = path.join(__dirname, 'lib', 'fsproxy.js')
             body.inputs.data.$xlsxModuleDirname = __dirname
             body.inputs.data.$tempDirectory = os.tmpdir()
           }
